@@ -1,5 +1,4 @@
-# .github/workflows/linter.yml
-name: Linter Check
+name: CI Pipeline
 
 on:
   push:
@@ -25,29 +24,33 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pylint
+
       - name: Run linter
         run: |
           pylint **/*.py
 
-
-
-test:
-    name: Run Unit Tests
+  build:
+    name: Build and Test with Docker
     runs-on: ubuntu-latest
     needs: lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
-      - name: Install dependencies
+      - name: Generate required .env file
         run: |
-          pip install -r requirements.txt
-          pip install pytest
-      - name: Run unit tests
-        run: |
-          pytest --maxfail=1 --disable-warnings -q
+          echo DEBUG=True >> .env
+          echo FLASK_DEBUG=1 >> .env
+          echo FLASK_APP=run.py >> .env
+
+      - name: Build Docker containers
+        run: docker-compose build
+
+      - name: Run tests
+        run: docker-compose up unit-test-container
+
