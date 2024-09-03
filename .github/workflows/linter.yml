@@ -1,4 +1,5 @@
-name: CI Workflow
+# .github/workflows/linter.yml
+name: Linter Check
 
 on:
   push:
@@ -21,16 +22,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install linter
+      - name: Install dependencies
         run: |
           pip install pylint
-
       - name: Run linter
         run: |
-          cd python-fast-app
           pylint **/*.py
 
-  test:
+
+
+test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
     needs: lint
@@ -45,12 +46,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd python-fast-app
           pip install -r requirements.txt
           pip install pytest
-
       - name: Run unit tests
         run: |
-          cd python-fast-app
           pytest --maxfail=1 --disable-warnings -q
-
